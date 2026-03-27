@@ -376,6 +376,10 @@ bool GameListModel::lessThan(const QModelIndex& left_index, const QModelIndex& r
 	if (!left || !right)
 		return false;
 
+	// Favourites always sort to the top regardless of column
+	if (left->is_favourite != right->is_favourite)
+		return left->is_favourite;
+
 	switch (column)
 	{
 		case Column_Type:

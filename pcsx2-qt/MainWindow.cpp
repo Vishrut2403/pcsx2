@@ -1553,6 +1553,12 @@ void MainWindow::onGameListEntryContextMenuRequested(const QPoint& point)
 #if !defined(__APPLE__)
 		connect(menu.addAction(tr("Create Game Shortcut...")), &QAction::triggered, [this]() { MainWindow::onCreateGameShortcutTriggered(); });
 #endif
+		const bool is_favourite = entry->is_favourite;
+		action = menu.addAction(is_favourite ? tr("Remove from Favourites") : tr("Add to Favourites"));
+		connect(action, &QAction::triggered, [this, entry]() {
+			GameList::SetGameFavourite(entry->path, !entry->is_favourite);
+			m_game_list_widget->refresh(false, false);
+		});
 
 		connect(menu.addAction(tr("Exclude From List")), &QAction::triggered,
 			[this, entry]() { getSettingsWindow()->getGameListSettingsWidget()->addExcludedPath(entry->path); });
