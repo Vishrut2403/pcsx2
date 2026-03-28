@@ -100,7 +100,7 @@ namespace GameList
 		u32 crc = 0;
 
 		CompatibilityRating compatibility_rating = CompatibilityRating::Unknown;
-		bool is_favourite = false;
+		bool is_favorite = false;
 
 		__fi bool IsDisc() const { return (type == EntryType::PS1Disc || type == EntryType::PS2Disc); }
 	};
@@ -158,8 +158,8 @@ namespace GameList
 		std::function<void(const Entry*, std::string)> save_callback = {});
 
 	// Custom properties support
-	bool IsGameFavourited(const std::string& path);
-	void SetGameFavourite(const std::string& path, bool favourite);
+	bool IsGameFavorited(const std::string& path);
+	void SetGameFavorite(const std::string& path, bool favorite);
 	void CheckCustomAttributesForPath(const std::string& path, bool& has_custom_title, bool& has_custom_region);
 	void SaveCustomTitleForPath(const std::string& path, const std::string& custom_title);
 	void SaveCustomRegionForPath(const std::string& path, int custom_region);
