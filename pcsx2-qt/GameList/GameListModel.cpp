@@ -18,7 +18,7 @@
 #include <QtGui/QPainter>
 
 static constexpr std::array<const char*, GameListModel::Column_Count> s_column_names = {
-	{"Type", "Code", "Title", "File Title", "CRC", "Time Played", "Last Played", "Size", "Region", "Compatibility", "Cover"}};
+	{"Type", "Code", "Title", "File Title", "CRC", "Time Played", "Last Played", "Size", "Region", "Compatibility", "Cover", "Favorite"}};
 
 static constexpr int COVER_ART_WIDTH = 350;
 static constexpr int COVER_ART_HEIGHT = 512;
@@ -305,9 +305,21 @@ QVariant GameListModel::data(const QModelIndex& index, const int role) const
 					return *m_cover_pixmap_cache.Insert(ge->path, m_loading_pixmap);
 				}
 
+				case Column_Favorite:
+					if (ge->is_favorite)
+						return m_favorite_pixmap;
+					return QVariant();
+
 				default:
 					return QVariant();
 			}
+		}
+
+		case Qt::UserRole:
+		{
+			if (index.column() == Column_Cover)
+				return ge->is_favorite;
+			return QVariant();
 		}
 
 		case Qt::SizeHintRole:
@@ -460,6 +472,14 @@ bool GameListModel::lessThan(const QModelIndex& left_index, const QModelIndex& r
 			return (left->last_played_time < right->last_played_time);
 		}
 
+		case Column_Favorite:
+		{
+			if (left->is_favorite == right->is_favorite)
+				return titlesLessThan(left_row, right_row);
+
+			return left->is_favorite > right->is_favorite;
+		}
+
 		default:
 			return false;
 	}
@@ -508,6 +528,7 @@ void GameListModel::loadCommonImages()
 		m_compatibility_pixmaps[rating] = QIcon((QStringLiteral("%1/icons/star-%2.svg").arg(base_path).arg(rating - 1))).pixmap(QSize(88, 16), m_dpr);
 
 	m_placeholder_pixmap.load(QStringLiteral("%1/cover-placeholder.png").arg(base_path));
+	m_favorite_pixmap = QIcon(QStringLiteral("%1/icons/star-fill.svg").arg(base_path)).pixmap(QSize(16, 16), m_dpr);
 }
 
 void GameListModel::setColumnDisplayNames()
@@ -522,6 +543,7 @@ void GameListModel::setColumnDisplayNames()
 	m_column_display_names[Column_Size] = tr("Size");
 	m_column_display_names[Column_Region] = tr("Region");
 	m_column_display_names[Column_Compatibility] = tr("Compatibility");
+	m_column_display_names[Column_Favorite] = tr("Favorite");
 }
 
 #include "moc_GameListModel.cpp"

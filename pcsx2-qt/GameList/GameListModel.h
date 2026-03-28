@@ -33,6 +33,7 @@ public:
 		Column_Region,
 		Column_Compatibility,
 		Column_Cover,
+		Column_Favorite,
 
 		Column_Count
 	};
@@ -99,5 +100,6 @@ private:
 	qreal m_dpr;
 
 	std::array<QPixmap, static_cast<int>(GameList::CompatibilityRatingCount)> m_compatibility_pixmaps;
+	QPixmap m_favorite_pixmap;
 	mutable LRUCache<std::string, QPixmap> m_cover_pixmap_cache;
 };
