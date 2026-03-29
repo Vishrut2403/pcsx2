@@ -38,6 +38,11 @@ public:
 		Column_Count
 	};
 
+	enum : int
+	{
+		NeedsFavoriteBadgeRole = Qt::UserRole
+	};
+
 	static std::optional<Column> getColumnIdForName(std::string_view name);
 	static const char* getColumnName(Column col);
 

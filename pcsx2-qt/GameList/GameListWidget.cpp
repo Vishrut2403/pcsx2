@@ -138,10 +138,10 @@ namespace
 		static constexpr int STAR_SIZE = 22;
 		static constexpr int STAR_MARGIN = 4;
 
-		GameListIconStyleDelegate(QWidget* parent)
+		GameListIconStyleDelegate(QWidget* parent, qreal dpr)
 			: QStyledItemDelegate(parent)
 		{
-			m_star_pixmap = QIcon(QStringLiteral("%1/icons/star-fill.svg").arg(QtHost::GetResourcesBasePath())).pixmap(QSize(STAR_SIZE, STAR_SIZE));
+			m_star_pixmap = QIcon(QStringLiteral("%1/icons/star-fill.svg").arg(QtHost::GetResourcesBasePath())).pixmap(QSize(STAR_SIZE, STAR_SIZE), dpr);
 		}
 		~GameListIconStyleDelegate() = default;
 
@@ -203,7 +203,7 @@ namespace
 			}
 
 			// Draw star overlay on bottom-right corner if game is favorited.
-			const bool is_favorite = index.data(Qt::UserRole).toBool();
+			const bool is_favorite = index.data(GameListModel::NeedsFavoriteBadgeRole).toBool();
 			if (is_favorite)
 			{
 				const QPoint star_pos = rect.bottomRight() - QPoint(STAR_SIZE + STAR_MARGIN, STAR_SIZE + STAR_MARGIN);
@@ -289,10 +289,10 @@ void GameListWidget::initialize()
 	m_table_view->setVerticalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
 
 	// Custom painter to center-align DisplayRoles (icons)
-	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Type), new GameListIconStyleDelegate(this));
-	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Region), new GameListIconStyleDelegate(this));
-	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Compatibility), new GameListIconStyleDelegate(this));
-	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Favorite), new GameListIconStyleDelegate(this));
+	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Type), new GameListIconStyleDelegate(this, devicePixelRatioF()));
+	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Region), new GameListIconStyleDelegate(this, devicePixelRatioF()));
+	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Compatibility), new GameListIconStyleDelegate(this, devicePixelRatioF()));
+	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Favorite), new GameListIconStyleDelegate(this, devicePixelRatioF()));
 
 	connect(m_table_view->selectionModel(), &QItemSelectionModel::currentChanged, this,
 		&GameListWidget::onSelectionModelCurrentChanged);
@@ -336,7 +336,7 @@ void GameListWidget::initialize()
 	m_list_view = new GameListGridListView(m_ui.stack);
 	m_list_view->setModel(m_sort_model);
 	m_list_view->setModelColumn(GameListModel::Column_Cover);
-	m_list_view->setItemDelegate(new GameListIconStyleDelegate(this));
+	m_list_view->setItemDelegate(new GameListIconStyleDelegate(this, devicePixelRatioF()));
 	m_list_view->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_list_view->setViewMode(QListView::IconMode);
 	m_list_view->setResizeMode(QListView::Adjust);

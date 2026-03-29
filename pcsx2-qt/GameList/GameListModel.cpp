@@ -315,7 +315,7 @@ QVariant GameListModel::data(const QModelIndex& index, const int role) const
 			}
 		}
 
-		case Qt::UserRole:
+		case NeedsFavoriteBadgeRole:
 		{
 			if (index.column() == Column_Cover)
 				return ge->is_favorite;
