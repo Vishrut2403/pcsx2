@@ -24,6 +24,7 @@ public:
 	{
 		Column_Type,
 		Column_Serial,
+		Column_Favorite,
 		Column_Title,
 		Column_FileTitle,
 		Column_CRC,
@@ -33,7 +34,6 @@ public:
 		Column_Region,
 		Column_Compatibility,
 		Column_Cover,
-		Column_Favorite,
 
 		Column_Count
 	};

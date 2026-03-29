@@ -52,6 +52,7 @@ static constexpr Qt::SortOrder DEFAULT_SORT_ORDER = Qt::AscendingOrder;
 static constexpr std::array<int, GameListModel::Column_Count> DEFAULT_COLUMN_WIDTHS = {{
 	55,  // type
 	85,  // code
+	95,  // favorite
 	-1,  // title
 	-1,  // file title
 	75,  // crc
@@ -61,7 +62,6 @@ static constexpr std::array<int, GameListModel::Column_Count> DEFAULT_COLUMN_WID
 	60,  // region
 	120, // compatibility
 	-1,  // cover
-	50   // favorite
 }};
 static_assert(static_cast<int>(DEFAULT_COLUMN_WIDTHS.size()) <= GameListModel::Column_Count,
 	"Game List: More default column widths than column types.");
@@ -135,10 +135,13 @@ namespace
 	class GameListIconStyleDelegate final : public QStyledItemDelegate
 	{
 	public:
+		static constexpr int STAR_SIZE = 22;
+		static constexpr int STAR_MARGIN = 4;
+
 		GameListIconStyleDelegate(QWidget* parent)
 			: QStyledItemDelegate(parent)
 		{
-			m_star_pixmap = QIcon(QStringLiteral("%1/icons/star-fill.svg").arg(QtHost::GetResourcesBasePath())).pixmap(QSize(22, 22));
+			m_star_pixmap = QIcon(QStringLiteral("%1/icons/star-fill.svg").arg(QtHost::GetResourcesBasePath())).pixmap(QSize(STAR_SIZE, STAR_SIZE));
 		}
 		~GameListIconStyleDelegate() = default;
 
@@ -203,8 +206,6 @@ namespace
 			const bool is_favorite = index.data(Qt::UserRole).toBool();
 			if (is_favorite)
 			{
-				static constexpr int STAR_SIZE = 22;
-				static constexpr int STAR_MARGIN = 4;
 				const QPoint star_pos = rect.bottomRight() - QPoint(STAR_SIZE + STAR_MARGIN, STAR_SIZE + STAR_MARGIN);
 				painter->drawPixmap(star_pos, m_star_pixmap);
 			}
@@ -288,9 +289,9 @@ void GameListWidget::initialize()
 	m_table_view->setVerticalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
 
 	// Custom painter to center-align DisplayRoles (icons)
-	m_table_view->setItemDelegateForColumn(0, new GameListIconStyleDelegate(this));
-	m_table_view->setItemDelegateForColumn(8, new GameListIconStyleDelegate(this));
-	m_table_view->setItemDelegateForColumn(9, new GameListIconStyleDelegate(this));
+	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Type), new GameListIconStyleDelegate(this));
+	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Region), new GameListIconStyleDelegate(this));
+	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Compatibility), new GameListIconStyleDelegate(this));
 	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Favorite), new GameListIconStyleDelegate(this));
 
 	connect(m_table_view->selectionModel(), &QItemSelectionModel::currentChanged, this,
@@ -805,6 +806,7 @@ void GameListWidget::resizeTableViewColumnsToFit()
 	QtUtils::ResizeColumnsForTableView(m_table_view, {
 														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_Type],
 														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_Serial],
+														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_Favorite],
 														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_Title],
 														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_FileTitle],
 														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_CRC],

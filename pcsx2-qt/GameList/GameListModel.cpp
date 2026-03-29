@@ -18,7 +18,7 @@
 #include <QtGui/QPainter>
 
 static constexpr std::array<const char*, GameListModel::Column_Count> s_column_names = {
-	{"Type", "Code", "Title", "File Title", "CRC", "Time Played", "Last Played", "Size", "Region", "Compatibility", "Cover", "Favorite"}};
+	{"Type", "Code", "Favorite", "Title", "File Title", "CRC", "Time Played", "Last Played", "Size", "Region", "Compatibility", "Cover"}};
 
 static constexpr int COVER_ART_WIDTH = 350;
 static constexpr int COVER_ART_HEIGHT = 512;
@@ -473,12 +473,7 @@ bool GameListModel::lessThan(const QModelIndex& left_index, const QModelIndex& r
 		}
 
 		case Column_Favorite:
-		{
-			if (left->is_favorite == right->is_favorite)
-				return titlesLessThan(left_row, right_row);
-
-			return left->is_favorite > right->is_favorite;
-		}
+			return titlesLessThan(left_row, right_row);
 
 		default:
 			return false;
