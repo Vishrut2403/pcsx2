@@ -67,6 +67,7 @@ public:
 	bool lessThan(const QModelIndex& left_index, const QModelIndex& right_index, int column) const;
 
 	bool getShowCoverTitles() const { return m_show_titles_for_covers; }
+	QPixmap getFavoritePixmap() const { return m_favorite_pixmap; }
 	void setShowCoverTitles(bool enabled) { m_show_titles_for_covers = enabled; }
 
 	float getCoverScale() const { return m_cover_scale; }

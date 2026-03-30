@@ -317,7 +317,7 @@ QVariant GameListModel::data(const QModelIndex& index, const int role) const
 
 		case NeedsFavoriteBadgeRole:
 		{
-			if (index.column() == Column_Cover)
+			if (index.column() == Column_Cover || index.column() == Column_Favorite)
 				return ge->is_favorite;
 			return QVariant();
 		}
