@@ -52,7 +52,7 @@ static constexpr Qt::SortOrder DEFAULT_SORT_ORDER = Qt::AscendingOrder;
 static constexpr std::array<int, GameListModel::Column_Count> DEFAULT_COLUMN_WIDTHS = {{
 	55,  // type
 	85,  // code
-	95,  // favorite
+	55,  // favorite
 	-1,  // title
 	-1,  // file title
 	75,  // crc
@@ -139,8 +139,8 @@ namespace
 		static constexpr int STAR_MARGIN = 4;
 
 		GameListIconStyleDelegate(QWidget* parent, const GameListModel* model)
-		: QStyledItemDelegate(parent)
-		, m_model(model)
+			: QStyledItemDelegate(parent)
+			, m_model(model)
 		{
 		}
 		~GameListIconStyleDelegate() = default;
@@ -169,7 +169,7 @@ namespace
 			// Determine starting location of icon (Qt uses top-left origin).
 			const int icon_width = static_cast<int>(static_cast<qreal>(icon.width()) / icon.devicePixelRatio());
 			const int icon_height = static_cast<int>(static_cast<qreal>(icon.height()) / icon.devicePixelRatio());
-			const QPoint icon_top_left = QPoint((rect.width() - icon_width) / 2, (rect.height() - icon_height) / 2);
+			const QPoint icon_top_left = rect.topLeft() + QPoint((rect.width() - icon_width) / 2, (rect.height() - icon_height) / 2);
 
 			// Change palette if the item is selected.
 			if (option.state & QStyle::State_Selected)
@@ -195,11 +195,11 @@ namespace
 					QPixmapCache::insert(key, highlighted_icon);
 				}
 
-				painter->drawPixmap(rect.topLeft() + icon_top_left, highlighted_icon);
+				painter->drawPixmap(icon_top_left, highlighted_icon);
 			}
 			else
 			{
-				painter->drawPixmap(rect.topLeft() + icon_top_left, icon);
+				painter->drawPixmap(icon_top_left, icon);
 			}
 
 			// Draw star overlay on bottom-right corner if game is favorited.
@@ -207,8 +207,11 @@ namespace
 				index.data(GameListModel::NeedsFavoriteBadgeRole).toBool();
 			if (is_favorite)
 			{
-				const QPoint star_pos = rect.bottomRight() - QPoint(STAR_SIZE + STAR_MARGIN, STAR_SIZE + STAR_MARGIN);
-				painter->drawPixmap(star_pos, m_model->getFavoritePixmap());
+				const QPixmap& star = m_model->getFavoritePixmap();
+				const QPoint icon_bottom_right = icon_top_left + QPoint(icon_width, icon_height);
+				const QSizeF size = star.deviceIndependentSize();
+				const QPoint star_pos = icon_bottom_right - QPoint(size.width() + STAR_MARGIN, size.height() + STAR_MARGIN);
+				painter->drawPixmap(star_pos, star);
 			}
 
 			// Restore the old clip path.

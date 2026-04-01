@@ -317,7 +317,7 @@ QVariant GameListModel::data(const QModelIndex& index, const int role) const
 
 		case NeedsFavoriteBadgeRole:
 		{
-			if (index.column() == Column_Cover || index.column() == Column_Favorite)
+			if (index.column() == Column_Cover)
 				return ge->is_favorite;
 			return QVariant();
 		}
@@ -410,6 +410,9 @@ bool GameListModel::lessThan(const QModelIndex& left_index, const QModelIndex& r
 			return (StringUtil::Strcasecmp(left->serial.c_str(), right->serial.c_str()) < 0);
 		}
 
+		// Favorite sort is always enabled
+		case Column_Favorite:
+			[[fallthrough]];
 		case Column_Title:
 			return titlesLessThan(left_row, right_row);
 
@@ -471,9 +474,6 @@ bool GameListModel::lessThan(const QModelIndex& left_index, const QModelIndex& r
 
 			return (left->last_played_time < right->last_played_time);
 		}
-
-		case Column_Favorite:
-			return titlesLessThan(left_row, right_row);
 
 		default:
 			return false;
