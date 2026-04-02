@@ -52,7 +52,6 @@ static constexpr Qt::SortOrder DEFAULT_SORT_ORDER = Qt::AscendingOrder;
 static constexpr std::array<int, GameListModel::Column_Count> DEFAULT_COLUMN_WIDTHS = {{
 	55,  // type
 	85,  // code
-	55,  // favorite
 	-1,  // title
 	-1,  // file title
 	75,  // crc
@@ -119,6 +118,15 @@ public:
 
 	bool lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const override
 	{
+		const auto lock = GameList::GetLock();
+		const GameList::Entry* left = GameList::GetEntryByIndex(source_left.row());
+		const GameList::Entry* right = GameList::GetEntryByIndex(source_right.row());
+
+		// Favorites always sort to the top regardless of column or sort direction.
+
+		if (left && right && left->is_favorite != right->is_favorite)
+			return sortOrder() == Qt::AscendingOrder ? left->is_favorite : right->is_favorite;
+
 		return m_model->lessThan(source_left, source_right, source_left.column());
 	}
 
@@ -135,12 +143,10 @@ namespace
 	class GameListIconStyleDelegate final : public QStyledItemDelegate
 	{
 	public:
-		static constexpr int STAR_SIZE = 22;
 		static constexpr int STAR_MARGIN = 4;
 
-		GameListIconStyleDelegate(QWidget* parent, const GameListModel* model)
+		GameListIconStyleDelegate(QWidget* parent)
 			: QStyledItemDelegate(parent)
-			, m_model(model)
 		{
 		}
 		~GameListIconStyleDelegate() = default;
@@ -207,7 +213,9 @@ namespace
 				index.data(GameListModel::NeedsFavoriteBadgeRole).toBool();
 			if (is_favorite)
 			{
-				const QPixmap& star = m_model->getFavoritePixmap();
+				const auto* sort_model = static_cast<const QSortFilterProxyModel*>(index.model());
+				const auto* game_model = static_cast<const GameListModel*>(sort_model->sourceModel());
+				const QPixmap& star = game_model->getFavoritePixmap();
 				const QPoint icon_bottom_right = icon_top_left + QPoint(icon_width, icon_height);
 				const QSizeF size = star.deviceIndependentSize();
 				const QPoint star_pos = icon_bottom_right - QPoint(size.width() + STAR_MARGIN, size.height() + STAR_MARGIN);
@@ -219,7 +227,6 @@ namespace
 		}
 
 	private:
-		const GameListModel* m_model;
 	};
 } // namespace
 
@@ -293,10 +300,9 @@ void GameListWidget::initialize()
 	m_table_view->setVerticalScrollMode(QAbstractItemView::ScrollMode::ScrollPerPixel);
 
 	// Custom painter to center-align DisplayRoles (icons)
-	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Type), new GameListIconStyleDelegate(this, m_model));
-	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Region), new GameListIconStyleDelegate(this, m_model));
-	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Compatibility), new GameListIconStyleDelegate(this, m_model));
-	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Favorite), new GameListIconStyleDelegate(this, m_model));
+	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Type), new GameListIconStyleDelegate(this));
+	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Region), new GameListIconStyleDelegate(this));
+	m_table_view->setItemDelegateForColumn(static_cast<int>(GameListModel::Column_Compatibility), new GameListIconStyleDelegate(this));
 
 	connect(m_table_view->selectionModel(), &QItemSelectionModel::currentChanged, this,
 		&GameListWidget::onSelectionModelCurrentChanged);
@@ -340,7 +346,7 @@ void GameListWidget::initialize()
 	m_list_view = new GameListGridListView(m_ui.stack);
 	m_list_view->setModel(m_sort_model);
 	m_list_view->setModelColumn(GameListModel::Column_Cover);
-	m_list_view->setItemDelegate(new GameListIconStyleDelegate(this, m_model));
+	m_list_view->setItemDelegate(new GameListIconStyleDelegate(this));
 	m_list_view->setSelectionMode(QAbstractItemView::SingleSelection);
 	m_list_view->setViewMode(QListView::IconMode);
 	m_list_view->setResizeMode(QListView::Adjust);
@@ -810,7 +816,6 @@ void GameListWidget::resizeTableViewColumnsToFit()
 	QtUtils::ResizeColumnsForTableView(m_table_view, {
 														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_Type],
 														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_Serial],
-														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_Favorite],
 														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_Title],
 														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_FileTitle],
 														 DEFAULT_COLUMN_WIDTHS[GameListModel::Column_CRC],

@@ -18,7 +18,7 @@
 #include <QtGui/QPainter>
 
 static constexpr std::array<const char*, GameListModel::Column_Count> s_column_names = {
-	{"Type", "Code", "Favorite", "Title", "File Title", "CRC", "Time Played", "Last Played", "Size", "Region", "Compatibility", "Cover"}};
+	{"Type", "Code", "Title", "File Title", "CRC", "Time Played", "Last Played", "Size", "Region", "Compatibility", "Cover"}};
 
 static constexpr int COVER_ART_WIDTH = 350;
 static constexpr int COVER_ART_HEIGHT = 512;
@@ -282,6 +282,11 @@ QVariant GameListModel::data(const QModelIndex& index, const int role) const
 		{
 			switch (index.column())
 			{
+				case Column_Title:
+				case Column_FileTitle:
+					if (ge->is_favorite)
+						return m_favorite_pixmap;
+					return QVariant();
 				case Column_Type:
 					return m_type_pixmaps[static_cast<u32>(ge->type)];
 
@@ -304,11 +309,6 @@ QVariant GameListModel::data(const QModelIndex& index, const int role) const
 					const_cast<GameListModel*>(this)->loadOrGenerateCover(ge);
 					return *m_cover_pixmap_cache.Insert(ge->path, m_loading_pixmap);
 				}
-
-				case Column_Favorite:
-					if (ge->is_favorite)
-						return m_favorite_pixmap;
-					return QVariant();
 
 				default:
 					return QVariant();
@@ -411,8 +411,6 @@ bool GameListModel::lessThan(const QModelIndex& left_index, const QModelIndex& r
 		}
 
 		// Favorite sort is always enabled
-		case Column_Favorite:
-			[[fallthrough]];
 		case Column_Title:
 			return titlesLessThan(left_row, right_row);
 
@@ -538,7 +536,6 @@ void GameListModel::setColumnDisplayNames()
 	m_column_display_names[Column_Size] = tr("Size");
 	m_column_display_names[Column_Region] = tr("Region");
 	m_column_display_names[Column_Compatibility] = tr("Compatibility");
-	m_column_display_names[Column_Favorite] = tr("Favorite");
 }
 
 #include "moc_GameListModel.cpp"

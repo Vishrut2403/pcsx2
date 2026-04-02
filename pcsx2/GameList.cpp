@@ -746,7 +746,7 @@ bool GameList::AddFileFromCache(const std::string& path, std::time_t timestamp, 
 		entry.total_played_time = iter->second.total_played_time;
 	}
 
-	entry.is_favorite = custom_attributes_ini.GetBoolValue(entry.path.c_str(), "Favorite", false);
+	entry.is_favorite = custom_attributes_ini.GetBoolValue(entry.path.c_str(), "Favorited", false);
 	s_entries.push_back(std::move(entry));
 	return true;
 }
@@ -785,7 +785,7 @@ bool GameList::ScanFile(std::string path, std::time_t timestamp, std::unique_loc
 		entry.total_played_time = iter->second.total_played_time;
 	}
 
-	entry.is_favorite = custom_attributes_ini.GetBoolValue(entry.path.c_str(), "Favorite", false);
+	entry.is_favorite = custom_attributes_ini.GetBoolValue(entry.path.c_str(), "Favorited", false);
 
 	auto custom_title = custom_attributes_ini.GetOptionalStringValue(entry.path.c_str(), "Title");
 	if (custom_title)
@@ -1479,11 +1479,11 @@ void GameList::SetGameFavorite(const std::string& path, bool favorite)
 
 	if (favorite)
 	{
-		custom_attributes.SetBoolValue(path.c_str(), "Favorite", true);
+		custom_attributes.SetBoolValue(path.c_str(), "Favorited", true);
 	}
 	else
 	{
-		custom_attributes.DeleteValue(path.c_str(), "Favorite");
+		custom_attributes.DeleteValue(path.c_str(), "Favorited");
 	}
 
 	if (custom_attributes.Save())
