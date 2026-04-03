@@ -410,7 +410,6 @@ bool GameListModel::lessThan(const QModelIndex& left_index, const QModelIndex& r
 			return (StringUtil::Strcasecmp(left->serial.c_str(), right->serial.c_str()) < 0);
 		}
 
-		// Favorite sort is always enabled
 		case Column_Title:
 			return titlesLessThan(left_row, right_row);
 
