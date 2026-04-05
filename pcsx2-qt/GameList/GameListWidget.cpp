@@ -127,7 +127,7 @@ public:
 		if (left && right && left->is_favorite != right->is_favorite)
 			return sortOrder() == Qt::AscendingOrder ? left->is_favorite : right->is_favorite;
 
-		return m_model->lessThan(source_left, source_right, source_left.column());
+		return m_model->lessThan(source_left, source_right, source_left.column(), sortOrder());
 	}
 
 private:
@@ -225,8 +225,6 @@ namespace
 			// Restore the old clip path.
 			painter->restore();
 		}
-
-	private:
 	};
 } // namespace
 

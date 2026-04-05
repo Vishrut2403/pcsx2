@@ -369,7 +369,7 @@ bool GameListModel::titlesLessThan(const int left_row, const int right_row) cons
 			   QString::fromStdString(right->GetTitleSort(m_prefer_english_titles))) < 0;
 }
 
-bool GameListModel::lessThan(const QModelIndex& left_index, const QModelIndex& right_index, const int column) const
+bool GameListModel::lessThan(const QModelIndex& left_index, const QModelIndex& right_index, const int column, Qt::SortOrder sort_order) const
 {
 	if (!left_index.isValid() || !right_index.isValid())
 		return false;
@@ -390,7 +390,7 @@ bool GameListModel::lessThan(const QModelIndex& left_index, const QModelIndex& r
 
 	// Favorites always sort to the top regardless of column
 	if (left->is_favorite != right->is_favorite)
-		return left->is_favorite;
+		return sort_order == Qt::AscendingOrder ? left->is_favorite : right->is_favorite;
 
 	switch (column)
 	{
