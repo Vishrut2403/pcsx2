@@ -118,15 +118,6 @@ public:
 
 	bool lessThan(const QModelIndex& source_left, const QModelIndex& source_right) const override
 	{
-		const auto lock = GameList::GetLock();
-		const GameList::Entry* left = GameList::GetEntryByIndex(source_left.row());
-		const GameList::Entry* right = GameList::GetEntryByIndex(source_right.row());
-
-		// Favorites always sort to the top regardless of column or sort direction.
-
-		if (left && right && left->is_favorite != right->is_favorite)
-			return sortOrder() == Qt::AscendingOrder ? left->is_favorite : right->is_favorite;
-
 		return m_model->lessThan(source_left, source_right, source_left.column(), sortOrder());
 	}
 
